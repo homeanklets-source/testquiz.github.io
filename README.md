@@ -1,155 +1,217 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mobile Quiz</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #2c3e50, #4ca1af);
-      color: white;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-
-    .quiz-container {
-      max-width: 500px;
-      margin: 50px auto;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .question {
-      font-size: 1.2em;
-      margin-bottom: 20px;
-    }
-
-    .options button {
-      display: block;
-      width: 100%;
-      margin: 10px 0;
-      padding: 15px;
-      font-size: 1em;
-      border: none;
-      border-radius: 5px;
-      background: rgba(255,255,255,0.2);
-      color: white;
-      transition: background 0.3s ease;
-    }
-
-    .options button:hover {
-      background: rgba(255,255,255,0.3);
-    }
-
-    .timer {
-      font-size: 1.1em;
-      margin-bottom: 10px;
-    }
-
-    @media (min-width: 768px) {
-      body::before {
-        content: "This quiz is only available on mobile devices.";
-        color: red;
-        display: block;
-        text-align: center;
-        padding: 20px;
-        font-size: 1.5em;
-      }
-
-      .quiz-container {
-        display: none;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Aircraft Quiz 🚀</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    background: radial-gradient(circle at top, #0b0c1d 0%, #000 100%);
+    color: #fff;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  h1, h2, h3 { text-align: center; }
+  .glow {
+    text-shadow: 0 0 10px #0ff, 0 0 20px #00f;
+  }
+  .quiz-container {
+    width: 90%;
+    max-width: 400px;
+    background: rgba(20, 20, 40, 0.9);
+    border: 2px solid #0ff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 0 20px #00f;
+    display: none;
+  }
+  .btn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #00f, #0ff);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover {
+    background: linear-gradient(90deg, #0ff, #00f);
+  }
+  .timer {
+    text-align: right;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #0ff;
+  }
+  input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    margin-top: 10px;
+    text-align: center;
+  }
+  .hidden { display: none; }
+</style>
 </head>
 <body>
-  <div class="quiz-container" id="quiz">
-    <div class="timer" id="timer">Time left: 60s</div>
-    <div class="question" id="question">Loading...</div>
-    <div class="options" id="options"></div>
-  </div>
 
-  <script>
-    const questions = [
-      {
-        question: "What is the capital of France?",
-        options: ["Paris", "Berlin", "Madrid", "Rome"],
-        answer: "Paris"
-      },
-      {
-        question: "Which planet is known as the Red Planet?",
-        options: ["Earth", "Mars", "Venus", "Jupiter"],
-        answer: "Mars"
-      },
-      {
-        question: "Who wrote 'Hamlet'?",
-        options: ["Shakespeare", "Dante", "Homer", "Tolstoy"],
-        answer: "Shakespeare"
-      }
-    ];
+<h1 class="glow">🚀 Space Aircraft Quiz</h1>
 
-    let current = 0;
-    let timer = 60;
-    let interval;
+<div id="start-screen">
+  <h2>Enter your name, cadet:</h2>
+  <input type="text" id="nameInput" placeholder="Your name">
+  <button class="btn" onclick="startQuiz()">Start Mission</button>
+</div>
 
-    function loadQuestion() {
-      if (current >= questions.length) {
-        document.getElementById('quiz').innerHTML = "<h2>Quiz Complete!</h2>";
-        return;
-      }
+<div class="quiz-container" id="quiz-container">
+  <div class="timer" id="timer">60</div>
+  <h3 id="question"></h3>
+  <div id="answers"></div>
+</div>
 
-      const q = questions[current];
-      document.getElementById('question').textContent = q.question;
+<div id="end-screen" class="hidden">
+  <h2 class="glow">Mission Complete 🛰️</h2>
+  <p id="final-score"></p>
+  <button class="btn" onclick="restart()">Restart</button>
+</div>
 
-      const optionsHTML = q.options.map(opt =>
-        `<button onclick="selectOption(this)">${opt}</button>`
-      ).join('');
-      document.getElementById('options').innerHTML = optionsHTML;
+<script>
+// 🚨 MOBILE ONLY
+if (window.innerWidth > 600) {
+  document.body.innerHTML = "<h2 style='color:white;text-align:center;margin-top:40vh'>🚫 Mobile Only Access</h2>";
+}
 
-      timer = 60;
-      document.getElementById('timer').textContent = `Time left: ${timer}s`;
+// 🛠️ QUIZ DATA
+const questions = [
+  {
+    q: "What does the acronym 'VTOL' stand for?",
+    options: ["Vertical Take-Off and Landing", "Variable Thrust Output Lift", "Vector Turbine Operation Lift", "Vortex Thrust Orientation Level"],
+    correct: 0
+  },
+  {
+    q: "Which part of an aircraft provides lift?",
+    options: ["Fuselage", "Wings", "Tail", "Cockpit"],
+    correct: 1
+  },
+  {
+    q: "What is the main function of ailerons?",
+    options: ["Control pitch", "Control yaw", "Control roll", "Increase lift"],
+    correct: 2
+  },
+  {
+    q: "Which engine type is most commonly used in commercial jets?",
+    options: ["Piston", "Turboprop", "Turbojet", "Turbofan"],
+    correct: 3
+  }
+];
 
-      clearInterval(interval);
-      interval = setInterval(() => {
-        timer--;
-        document.getElementById('timer').textContent = `Time left: ${timer}s`;
-        if (timer <= 0) {
-          nextQuestion();
-        }
-      }, 1000);
+let currentQuestion = 0;
+let score = 0;
+let timer;
+let timeLeft = 60;
+let playerName = localStorage.getItem('quizPlayer') || null;
+
+// 🧠 Detect tab switch
+let hidden, visibilityChange; 
+if (typeof document.hidden !== "undefined") { hidden = "hidden"; visibilityChange = "visibilitychange"; }
+
+document.addEventListener(visibilityChange, () => {
+  if (document.hidden) {
+    score -= 1;
+    alert("You switched tabs! -1 point. Next question.");
+    nextQuestion();
+  }
+});
+
+// 🚀 START QUIZ
+function startQuiz() {
+  const nameInput = document.getElementById("nameInput").value.trim();
+  if (!nameInput && !playerName) {
+    alert("Please enter your name, cadet!");
+    return;
+  }
+  playerName = nameInput || playerName;
+  localStorage.setItem('quizPlayer', playerName);
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("quiz-container").style.display = "block";
+  loadQuestion();
+}
+
+// ⏱️ TIMER
+function startTimer() {
+  timeLeft = 60;
+  const timerDisplay = document.getElementById("timer");
+  timerDisplay.textContent = timeLeft;
+  clearInterval(timer);
+  timer = setInterval(() => {
+    timeLeft--;
+    timerDisplay.textContent = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      nextQuestion();
     }
+  }, 1000);
+}
 
-    function nextQuestion() {
-      current++;
-      loadQuestion();
-    }
+// 📋 LOAD QUESTION
+function loadQuestion() {
+  if (currentQuestion >= questions.length) return endQuiz();
+  const q = questions[currentQuestion];
+  document.getElementById("question").textContent = q.q;
+  const answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = "";
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = opt;
+    btn.classList.add("btn");
+    btn.onclick = () => selectAnswer(i);
+    answersDiv.appendChild(btn);
+  });
+  startTimer();
+}
 
-    function selectOption(btn) {
-      const selected = btn.textContent;
-      const correct = questions[current].answer;
-      if (selected === correct) {
-        btn.style.background = "green";
-      } else {
-        btn.style.background = "red";
-      }
-      setTimeout(nextQuestion, 1000);
-    }
+// ✅ SELECT ANSWER
+function selectAnswer(i) {
+  clearInterval(timer);
+  if (i === questions[currentQuestion].correct) score++;
+  nextQuestion();
+}
 
-    // Detect tab/app switching
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        alert("You switched apps or tabs. You are disqualified.");
-        document.body.innerHTML = "<h1 style='color:red;'>Disqualified for switching apps/tabs!</h1>";
-      }
-    });
+// ➡️ NEXT QUESTION
+function nextQuestion() {
+  clearInterval(timer);
+  currentQuestion++;
+  if (currentQuestion < questions.length) loadQuestion();
+  else endQuiz();
+}
 
-    // Start quiz
-    loadQuestion();
-  </script>
+// 🏁 END QUIZ
+function endQuiz() {
+  clearInterval(timer);
+  document.getElementById("quiz-container").style.display = "none";
+  document.getElementById("end-screen").classList.remove("hidden");
+  document.getElementById("final-score").textContent = `${playerName}, your final score: ${score}/${questions.length}`;
+  localStorage.setItem('quizScore', score);
+}
+
+// 🔁 RESTART
+function restart() {
+  currentQuestion = 0;
+  score = 0;
+  document.getElementById("end-screen").classList.add("hidden");
+  document.getElementById("quiz-container").style.display = "block";
+  loadQuestion();
+}
+</script>
 </body>
 </html>
-
