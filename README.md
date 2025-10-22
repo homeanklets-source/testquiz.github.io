@@ -1,218 +1,330 @@
 
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Space Aircraft Quiz 🚀</title>
-<style>
-  body {
-    margin: 0;
-    font-family: 'Orbitron', sans-serif;
-    background: radial-gradient(circle at top, #0b0c1d 0%, #000 100%);
-    color: #fff;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  h1, h2, h3 { text-align: center; }
-  .glow {
-    text-shadow: 0 0 10px #0ff, 0 0 20px #00f;
-  }
-  .quiz-container {
-    width: 90%;
-    max-width: 400px;
-    background: rgba(20, 20, 40, 0.9);
-    border: 2px solid #0ff;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 0 20px #00f;
-    display: none;
-  }
-  .btn {
-    display: block;
-    width: 100%;
-    margin-top: 10px;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    background: linear-gradient(90deg, #00f, #0ff);
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .btn:hover {
-    background: linear-gradient(90deg, #0ff, #00f);
-  }
-  .timer {
-    text-align: right;
-    font-size: 18px;
-    margin-bottom: 10px;
-    color: #0ff;
-  }
-  input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-    margin-top: 10px;
-    text-align: center;
-  }
-  .hidden { display: none; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>Basics of Flight — 20 Q Quiz</title>
+  <style>
+    /* Basic reset */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+
+    /* Background: space image with dim overlay */
+    body{
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      color:#e8f0ff;
+      background-image: url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=80');
+      background-size:cover;background-position:center;
+      position:relative;min-height:100%;
+    }
+    /* dark overlay */
+    body::before{content:'';position:fixed;inset:0;background:linear-gradient(180deg,rgba(2,6,23,0.75),rgba(6,12,30,0.85));pointer-events:none}
+
+    /* Container */
+    .wrap{max-width:420px;margin:40px auto;padding:18px;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));backdrop-filter:blur(6px);border-radius:14px;border:1px solid rgba(255,255,255,0.06)}
+
+    header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#2b6cff55,#8b4bff44);display:flex;align-items:center;justify-content:center;font-weight:700}
+    h1{font-size:18px}
+    p.lead{font-size:13px;color:#cfe1ff;margin-top:6px}
+
+    .card{margin-top:12px;padding:14px;border-radius:12px;background:linear-gradient(180deg,rgba(0,0,0,0.18),rgba(0,0,0,0.12));border:1px solid rgba(255,255,255,0.03)}
+
+    .question{font-weight:600;margin-bottom:10px}
+    .options{display:flex;flex-direction:column;gap:8px}
+    .option{background:rgba(255,255,255,0.03);padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);font-size:14px}
+    .option input{margin-right:10px}
+
+    .meta{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+    .timer{font-weight:700;font-size:16px}
+    .controls{display:flex;gap:8px}
+    button{background:#2b6cff;border:none;color:white;padding:8px 12px;border-radius:8px;font-weight:600}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.08)}
+
+    .small{font-size:13px;color:#cfe1ff}
+    .muted{color:#98b3d9;font-size:13px}
+
+    .hidden{display:none}
+
+    .center{display:flex;justify-content:center}
+
+    footer{margin-top:12px;text-align:center;color:#9fb8ff;font-size:13px}
+
+    /* Responsive: centralize and make mobile friendly */
+    @media(min-width:900px){
+      .wrap{margin-top:80px}
+    }
+
+    /* disqualified overlay */
+    .overlay{position:fixed;inset:0;background:rgba(2,6,23,0.8);display:flex;align-items:center;justify-content:center;z-index:100;padding:18px}
+    .overlay .box{background:linear-gradient(180deg,#0b1220,#081024);padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);max-width:420px;text-align:center}
+    .badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#ff4d4d;color:white;font-weight:700}
+  </style>
 </head>
 <body>
+  <main class="wrap" id="app">
+    <header>
+      <div class="logo">✈️</div>
+      <div>
+        <h1>Basics of Flight — 20 Q Quiz</h1>
+        <p class="lead">20 multiple-choice questions • 1 minute per question • Phone only</p>
+      </div>
+    </header>
 
-<h1 class="glow">🚀 Space Aircraft Quiz</h1>
+    <div id="mobile-block" class="card hidden">
+      <p class="question">This quiz must be taken on a phone. Please open this page on your mobile device (narrow screen) to continue.</p>
+    </div>
 
-<div id="start-screen">
-  <h2>Enter your name, cadet:</h2>
-  <input type="text" id="nameInput" placeholder="Your name">
-  <button class="btn" onclick="startQuiz()">Start Mission</button>
-</div>
+    <div id="quiz-area" class="card hidden">
+      <div id="status" class="muted">Question <span id="qnum">1</span> / 20</div>
+      <div style="height:8px"></div>
+      <div id="question-box">
+        <div class="question" id="questionText">Question text</div>
+        <div class="options" id="options"></div>
+      </div>
 
-<div class="quiz-container" id="quiz-container">
-  <div class="timer" id="timer">60</div>
-  <h3 id="question"></h3>
-  <div id="answers"></div>
-</div>
+      <div class="meta">
+        <div class="timer">Time left: <span id="timer">60</span>s</div>
+        <div class="controls">
+          <button id="submitBtn">Submit</button>
+          <button id="skipBtn" class="ghost">Skip</button>
+        </div>
+      </div>
 
-<div id="end-screen" class="hidden">
-  <h2 class="glow">Mission Complete 🛰️</h2>
-  <p id="final-score"></p>
-  <button class="btn" onclick="restart()">Restart</button>
-</div>
+      <div style="height:10px"></div>
+      <div class="small">Score: <span id="score">0</span> &nbsp;•&nbsp; Infractions: <span id="infractions">0</span>/3</div>
+    </div>
 
-<script>
-// 🚨 MOBILE ONLY
-if (window.innerWidth > 600) {
-  document.body.innerHTML = "<h2 style='color:white;text-align:center;margin-top:40vh'>🚫 Mobile Only Access</h2>";
-}
+    <div id="start-area" class="card center">
+      <div>
+        <p class="small muted">Ready? Make sure you're on your phone and won't switch apps — switching apps will penalize you.</p>
+        <div style="height:10px"></div>
+        <div class="center"><button id="startBtn">Start Quiz</button></div>
+      </div>
+    </div>
 
-// 🛠️ QUIZ DATA
-const questions = [
-  {
-    q: "What does the acronym 'VTOL' stand for?",
-    options: ["Vertical Take-Off and Landing", "Variable Thrust Output Lift", "Vector Turbine Operation Lift", "Vortex Thrust Orientation Level"],
-    correct: 0
-  },
-  {
-    q: "Which part of an aircraft provides lift?",
-    options: ["Fuselage", "Wings", "Tail", "Cockpit"],
-    correct: 1
-  },
-  {
-    q: "What is the main function of ailerons?",
-    options: ["Control pitch", "Control yaw", "Control roll", "Increase lift"],
-    correct: 2
-  },
-  {
-    q: "Which engine type is most commonly used in commercial jets?",
-    options: ["Piston", "Turboprop", "Turbojet", "Turbofan"],
-    correct: 3
-  }
-];
+    <div id="result" class="card hidden">
+      <h2 id="resultTitle">Results</h2>
+      <p class="small">Final score: <strong id="finalScore">0</strong> / 20</p>
+      <p class="small">Correct: <span id="correctCount">0</span> • Skipped: <span id="skippedCount">0</span> • Infractions: <span id="finalInfractions">0</span></p>
+      <div style="height:8px"></div>
+      <div class="center"><button id="retryBtn" class="ghost">Retry</button></div>
+    </div>
 
-let currentQuestion = 0;
-let score = 0;
-let timer;
-let timeLeft = 60;
-let playerName = localStorage.getItem('quizPlayer') || null;
+    <footer>Built for mobile • Do NOT rotate screen during a question</footer>
+  </main>
 
-// 🧠 Detect tab switch
-let hidden, visibilityChange; 
-if (typeof document.hidden !== "undefined") { hidden = "hidden"; visibilityChange = "visibilitychange"; }
+  <div id="disqOverlay" class="overlay hidden">
+    <div class="box">
+      <div class="badge">DISQUALIFIED</div>
+      <h3 style="margin-top:12px">You have been disqualified</h3>
+      <p class="muted">You switched apps or tabs three times. The session is terminated.</p>
+      <div style="height:12px"></div>
+      <button id="disqClose">Close</button>
+    </div>
+  </div>
 
-document.addEventListener(visibilityChange, () => {
-  if (document.hidden) {
-    score -= 1;
-    alert("You switched tabs! -1 point. Next question.");
-    nextQuestion();
-  }
-});
+  <script>
+    // Questions array (20 basic flight MCQs)
+    const QUESTIONS = [
+      {q: 'What primary force keeps an airplane aloft?', choices:['Gravity','Lift','Thrust','Drag'], a:1},
+      {q: 'Which surface is mainly used to control pitch?', choices:['Ailerons','Rudder','Elevator','Flaps'], a:2},
+      {q: 'Angle between chord line and relative wind is called?', choices:['Dihedral','Sweep','Angle of attack','Camber'], a:2},
+      {q: 'Which principle is commonly used to explain lift (though simplified)?', choices:['Bernoulli’s principle','Newton’s third law','Conservation of mass','Hooke’s law'], a:0},
+      {q: 'What produces thrust on a jet airplane?', choices:['Propellers','Jet engines','Ailerons','Spoilers'], a:1},
+      {q: 'What is drag?', choices:['Downward force','Sideways force','Resistance opposing motion through air','Force that turns plane'], a:2},
+      {q: 'Devices that increase lift at low speeds for takeoff/landing are called?', choices:['Rudders','Slats and flaps','Spoilers','Ailerons'], a:1},
+      {q: 'What is stall?', choices:['A kind of lift increase','Loss of lift due to excessive angle of attack','An engine failure','Intentional descent'], a:1},
+      {q: 'Which control changes roll?', choices:['Rudder','Elevator','Ailerons','Trim tabs'], a:2},
+      {q: 'Camber of a wing affects which of the following?', choices:['Thrust','Lift','Weight','Fuel efficiency only'], a:1},
+      {q: 'What is the purpose of the vertical stabilizer?', choices:['Control pitch','Control yaw','Increase lift','Reduce drag'], a:1},
+      {q: 'Ground effect generally causes what during landing/takeoff?', choices:['Increased drag','Less lift','Increased lift near ground','No change'], a:2},
+      {q: 'What is center of pressure?', choices:['Point where total aerodynamic pressure acts','Pilot seating position','Fuel center','Landing gear location'], a:0},
+      {q: 'Dihedral angle on wings helps with which stability?', choices:['Longitudinal','Directional','Lateral (roll) stability','None'], a:2},
+      {q: 'Thrust-to-weight ratio affects...', choices:['Rate of climb','Color of aircraft','Stall speed only','Cabin pressure'], a:0},
+      {q: 'Compressibility effects become important at about what speed?', choices:['Very slow speeds','Transonic speeds (near Mach 1)','Only in helicopters','Only underwater'], a:1},
+      {q: 'Which instrument measures angle of attack directly?', choices:['Airspeed indicator','Altimeter','AoA probe/sensor','Turn coordinator'], a:2},
+      {q: 'What causes adverse yaw?', choices:['Ailerons creating differential drag','Using flaps','Rudder input only','Engine failure'], a:0},
+      {q: 'Which is a form of parasite drag?', choices:['Induced drag','Skin friction drag','Lift-induced drag','None'], a:1},
+      {q: 'Flaps extended on landing do what?', choices:['Decrease lift and increase speed','Increase lift and increase drag','Only change thrust','Make aircraft lighter'], a:1}
+    ];
 
-// 🚀 START QUIZ
-function startQuiz() {
-  const nameInput = document.getElementById("nameInput").value.trim();
-  if (!nameInput && !playerName) {
-    alert("Please enter your name, cadet!");
-    return;
-  }
-  playerName = nameInput || playerName;
-  localStorage.setItem('quizPlayer', playerName);
-  document.getElementById("start-screen").style.display = "none";
-  document.getElementById("quiz-container").style.display = "block";
-  loadQuestion();
-}
+    // state
+    let idx=0; let score=0; let infractions=0; let timer=60; let interval=null; let answered=[]; let skipped=0; let correct=0; let disqualified=false;
 
-// ⏱️ TIMER
-function startTimer() {
-  timeLeft = 60;
-  const timerDisplay = document.getElementById("timer");
-  timerDisplay.textContent = timeLeft;
-  clearInterval(timer);
-  timer = setInterval(() => {
-    timeLeft--;
-    timerDisplay.textContent = timeLeft;
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      nextQuestion();
+    // elements
+    const mobileBlock = document.getElementById('mobile-block');
+    const quizArea = document.getElementById('quiz-area');
+    const startArea = document.getElementById('start-area');
+    const startBtn = document.getElementById('startBtn');
+    const qnum = document.getElementById('qnum');
+    const questionText = document.getElementById('questionText');
+    const optionsBox = document.getElementById('options');
+    const timerEl = document.getElementById('timer');
+    const submitBtn = document.getElementById('submitBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const scoreEl = document.getElementById('score');
+    const infraEl = document.getElementById('infractions');
+    const result = document.getElementById('result');
+    const resultTitle = document.getElementById('resultTitle');
+    const finalScore = document.getElementById('finalScore');
+    const correctCount = document.getElementById('correctCount');
+    const skippedCount = document.getElementById('skippedCount');
+    const finalInfractions = document.getElementById('finalInfractions');
+    const retryBtn = document.getElementById('retryBtn');
+    const disqOverlay = document.getElementById('disqOverlay');
+    const disqClose = document.getElementById('disqClose');
+
+    // mobile-only guard
+    function isPhone(){
+      // prefer viewport width + userAgent fallback
+      return (Math.min(window.innerWidth, window.innerHeight) <= 768) || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
     }
-  }, 1000);
-}
 
-// 📋 LOAD QUESTION
-function loadQuestion() {
-  if (currentQuestion >= questions.length) return endQuiz();
-  const q = questions[currentQuestion];
-  document.getElementById("question").textContent = q.q;
-  const answersDiv = document.getElementById("answers");
-  answersDiv.innerHTML = "";
-  q.options.forEach((opt, i) => {
-    const btn = document.createElement("button");
-    btn.textContent = opt;
-    btn.classList.add("btn");
-    btn.onclick = () => selectAnswer(i);
-    answersDiv.appendChild(btn);
-  });
-  startTimer();
-}
+    function showMobileOnlyMsg(){
+      startArea.classList.add('hidden');
+      quizArea.classList.add('hidden');
+      mobileBlock.classList.remove('hidden');
+    }
 
-// ✅ SELECT ANSWER
-function selectAnswer(i) {
-  clearInterval(timer);
-  if (i === questions[currentQuestion].correct) score++;
-  nextQuestion();
-}
+    function showStart(){
+      mobileBlock.classList.add('hidden');
+      startArea.classList.remove('hidden');
+    }
 
-// ➡️ NEXT QUESTION
-function nextQuestion() {
-  clearInterval(timer);
-  currentQuestion++;
-  if (currentQuestion < questions.length) loadQuestion();
-  else endQuiz();
-}
+    function startQuiz(){
+      if(!isPhone()){ showMobileOnlyMsg(); return; }
+      startArea.classList.add('hidden');
+      quizArea.classList.remove('hidden');
+      idx=0; score=0; infractions=0; timer=60; answered=[]; skipped=0; correct=0; disqualified=false;
+      updateMeta();
+      loadQuestion();
+    }
 
-// 🏁 END QUIZ
-function endQuiz() {
-  clearInterval(timer);
-  document.getElementById("quiz-container").style.display = "none";
-  document.getElementById("end-screen").classList.remove("hidden");
-  document.getElementById("final-score").textContent = `${playerName}, your final score: ${score}/${questions.length}`;
-  localStorage.setItem('quizScore', score);
-}
+    function updateMeta(){ qnum.textContent = idx+1; scoreEl.textContent = score; infraEl.textContent = infractions; }
 
-// 🔁 RESTART
-function restart() {
-  currentQuestion = 0;
-  score = 0;
-  document.getElementById("end-screen").classList.add("hidden");
-  document.getElementById("quiz-container").style.display = "block";
-  loadQuestion();
-}
-</script>
+    function loadQuestion(){
+      if(disqualified) return;
+      if(idx>=QUESTIONS.length){ finishQuiz(); return; }
+      const Q = QUESTIONS[idx];
+      questionText.textContent = Q.q;
+      optionsBox.innerHTML='';
+      Q.choices.forEach((c,i)=>{
+        const id = 'opt'+i;
+        const div = document.createElement('label'); div.className='option';
+        div.innerHTML = `<input type="radio" name="choice" value="${i}"> <span>${c}</span>`;
+        optionsBox.appendChild(div);
+      });
+      // reset timer
+      timer = 60; timerEl.textContent = timer;
+      if(interval) clearInterval(interval);
+      interval = setInterval(()=>{
+        timer--;
+        timerEl.textContent = timer;
+        if(timer<=0){
+          handleSkip('timeout');
+        }
+      },1000);
+      updateMeta();
+    }
+
+    function handleSubmit(){
+      if(disqualified) return;
+      const sel = document.querySelector('input[name="choice"]:checked');
+      clearInterval(interval);
+      if(!sel){ // treat as skipped
+        skipped++; answered.push(null);
+      } else {
+        const val = Number(sel.value);
+        answered.push(val);
+        if(val === QUESTIONS[idx].a){ score++; correct++; }
+      }
+      idx++;
+      if(idx<QUESTIONS.length) loadQuestion(); else finishQuiz();
+    }
+
+    function handleSkip(reason='manual'){
+      if(disqualified) return;
+      clearInterval(interval);
+      skipped++; answered.push(null);
+      idx++;
+      // continue
+      if(idx<QUESTIONS.length) loadQuestion(); else finishQuiz();
+    }
+
+    function finishQuiz(){
+      clearInterval(interval);
+      quizArea.classList.add('hidden');
+      result.classList.remove('hidden');
+      finalScore.textContent = score;
+      correctCount.textContent = correct;
+      skippedCount.textContent = skipped;
+      finalInfractions.textContent = infractions;
+      resultTitle.textContent = disqualified? 'Disqualified' : 'Results';
+    }
+
+    // infractions: detect visibility change (tab switch / app switch)
+    document.addEventListener('visibilitychange', ()=>{
+      if(document.hidden){
+        // user switched away - apply penalty, skip question, count infraction
+        infractions++;
+        score = Math.max(0, score-1);
+        infraEl.textContent = infractions; scoreEl.textContent = score;
+        // disqualify if thrice
+        if(infractions>=3){
+          disqualified=true;
+          // stop timer and show overlay
+          clearInterval(interval);
+          disqOverlay.classList.remove('hidden');
+          quizArea.classList.add('hidden');
+          startArea.classList.add('hidden');
+          result.classList.add('hidden');
+          finalInfractions.textContent = infractions;
+          return;
+        }
+        // skip current question automatically
+        handleSkip('switch');
+      }
+    });
+
+    // Additional safeguards: count blur on window (some browsers)
+    window.addEventListener('blur', ()=>{
+      // On mobile this may be noisy; rely primarily on visibilitychange. Keep blur but throttle to avoid double-counting.
+    });
+
+    // Buttons
+    startBtn.addEventListener('click', startQuiz);
+    submitBtn.addEventListener('click', handleSubmit);
+    skipBtn.addEventListener('click', ()=>{ handleSkip('manual'); });
+    retryBtn.addEventListener('click', ()=>{ result.classList.add('hidden'); startArea.classList.remove('hidden'); });
+    disqClose.addEventListener('click', ()=>{ disqOverlay.classList.add('hidden'); startArea.classList.remove('hidden'); });
+
+    // on load: show start or phone requirement
+    window.addEventListener('load', ()=>{
+      if(!isPhone()){
+        showMobileOnlyMsg();
+      } else {
+        showStart();
+      }
+    });
+
+    // Prevent going back to desktop layout during quiz by monitoring resize slightly
+    let lastW = window.innerWidth;
+    window.addEventListener('resize', ()=>{
+      if(!isPhone() && (!quizArea.classList.contains('hidden'))){
+        // if they rotated to larger width while in quiz, treat as switching away
+        // (optional) we will not auto-penalize here to avoid false positives; message the user instead
+        alert('This quiz is designed for phones. Please continue on a mobile device.');
+      }
+    });
+
+    // Accessibility & quick hint: warn before leaving page
+    window.addEventListener('beforeunload', (e)=>{
+      // no custom message in modern browsers but this prompts a confirmation in some browsers
+      e.preventDefault(); e.returnValue='';
+    });
+  </script>
 </body>
 </html>
+
 
